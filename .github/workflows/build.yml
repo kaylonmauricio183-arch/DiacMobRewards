@@ -1,0 +1,37 @@
+name: Build DiacMobRewards
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Instalar Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.1.0'
+
+      - name: Extrair e compilar
+        run: |
+          unzip -q DiacMobRewards-1.1.0-source.zip -d projeto
+          BUILD_FILE=$(find projeto -name build.gradle.kts -print -quit)
+          PROJECT_DIR=$(dirname "$BUILD_FILE")
+          gradle -p "$PROJECT_DIR" build
+
+      - name: Salvar plugin JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: DiacMobRewards-JAR
+          path: projeto/**/build/libs/*.jar
